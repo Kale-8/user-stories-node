@@ -1,6 +1,7 @@
 import express from 'express';
 import router from './routes';
 import { sequelize, testConnection } from './config/database';
+import './models/associations'; // Import associations
 
 const app = express();
 app.use(express.json());
