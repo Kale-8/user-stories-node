@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
+import { BaseController } from './base.controller';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
-export class AuthController {
+export class AuthController extends BaseController {
   static async register(req: Request, res: Response) {
     try {
       const result = await AuthService.register(req.body);
-      return res.status(201).json(result);
+      return res.status(HTTP_STATUS.CREATED).json(result);
     } catch (err: any) {
-      return res.status(400).json({ message: err.message || 'Error en registro' });
+      return this.handleError(res, err, 'Error en registro', HTTP_STATUS.BAD_REQUEST);
     }
   }
 
@@ -16,7 +18,7 @@ export class AuthController {
       const result = await AuthService.login(req.body);
       return res.json(result);
     } catch (err: any) {
-      return res.status(400).json({ message: err.message || 'Error en login' });
+      return this.handleError(res, err, 'Error en login', HTTP_STATUS.BAD_REQUEST);
     }
   }
 
@@ -24,12 +26,12 @@ export class AuthController {
     try {
       const { refreshToken } = req.body;
       if (!refreshToken) {
-        return res.status(400).json({ message: 'Refresh token requerido' });
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: ERROR_MESSAGES.REFRESH_TOKEN_REQUIRED });
       }
       const result = await AuthService.refreshToken(refreshToken);
       return res.json(result);
     } catch (err: any) {
-      return res.status(401).json({ message: err.message || 'Error en refresh' });
+      return this.handleError(res, err, 'Error en refresh', HTTP_STATUS.UNAUTHORIZED);
     }
   }
 }

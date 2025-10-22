@@ -1,79 +1,83 @@
 import { Request, Response } from 'express';
 import { ProductService } from '../services/product.service';
+import { BaseController } from './base.controller';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
-export class ProductController {
+export class ProductController extends BaseController {
   static async getAllProducts(req: Request, res: Response) {
     try {
       const products = await ProductService.getAllProducts();
       return res.json(products);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener productos' });
+      return this.handleError(res, err, 'Error al obtener productos');
     }
   }
 
   static async getProductById(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = this.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const product = await ProductService.getProductById(id);
-      if (!product) {
-        return res.status(404).json({ message: 'Producto no encontrado' });
-      }
+      const product = await this.handleNotFound(
+        res,
+        () => ProductService.getProductById(validation.parsedId!),
+        ERROR_MESSAGES.PRODUCT_NOT_FOUND
+      );
 
+      if (product instanceof Response) return product;
       return res.json(product);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener producto' });
+      return this.handleError(res, err, 'Error al obtener producto');
     }
   }
 
   static async createProduct(req: Request, res: Response) {
     try {
       const product = await ProductService.createProduct(req.body);
-      return res.status(201).json(product);
+      return res.status(HTTP_STATUS.CREATED).json(product);
     } catch (err: any) {
-      if (err.message === 'El código del producto ya existe') {
-        return res.status(400).json({ message: err.message });
-      }
-      return res.status(500).json({ message: err.message || 'Error al crear producto' });
+      const statusCode = err.message === ERROR_MESSAGES.DUPLICATE_PRODUCT_CODE ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      return this.handleError(res, err, 'Error al crear producto', statusCode);
     }
   }
 
   static async updateProduct(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = this.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const product = await ProductService.updateProduct(id, req.body);
-      if (!product) {
-        return res.status(404).json({ message: 'Producto no encontrado' });
-      }
+      const product = await this.handleNotFound(
+        res,
+        () => ProductService.updateProduct(validation.parsedId!, req.body),
+        ERROR_MESSAGES.PRODUCT_NOT_FOUND
+      );
 
+      if (product instanceof Response) return product;
       return res.json(product);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al actualizar producto' });
+      return this.handleError(res, err, 'Error al actualizar producto');
     }
   }
 
   static async deleteProduct(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = this.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const deleted = await ProductService.deleteProduct(id);
+      const deleted = await ProductService.deleteProduct(validation.parsedId!);
       if (!deleted) {
-        return res.status(404).json({ message: 'Producto no encontrado' });
+        return res.status(HTTP_STATUS.NOT_FOUND).json({ message: ERROR_MESSAGES.PRODUCT_NOT_FOUND });
       }
 
-      return res.status(204).send();
+      return res.status(HTTP_STATUS.NO_CONTENT).send();
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al eliminar producto' });
+      return this.handleError(res, err, 'Error al eliminar producto');
     }
   }
 }

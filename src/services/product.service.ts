@@ -1,7 +1,8 @@
 import { ProductDAO } from '../dao/product.dao';
 import { CreateProductDTO, UpdateProductDTO, ProductResponseDTO } from '../dto/product.dto';
+import { BaseService } from './base.service';
 
-export class ProductService {
+export class ProductService extends BaseService<any, CreateProductDTO, UpdateProductDTO, ProductResponseDTO> {
   static async getAllProducts(): Promise<ProductResponseDTO[]> {
     const products = await ProductDAO.findAll();
     return products.map(this.mapToResponseDTO);
