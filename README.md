@@ -1,41 +1,41 @@
 # SportsLine API
 
-API completa para gestión de productos, clientes, usuarios y pedidos de SportsLine. Desarrollada con Node.js, TypeScript, PostgreSQL y Docker.
+Complete API for managing products, clients, users and orders for SportsLine. Built with Node.js, TypeScript, PostgreSQL and Docker.
 
-## 🚀 Características
+## 🚀 Features
 
-- **Autenticación JWT** con refresh tokens
-- **Roles de usuario** (admin, vendedor)
-- **CRUD completo** para productos, clientes y pedidos
-- **Validaciones centralizadas** con express-validator
-- **Documentación Swagger** completa
-- **Encriptación híbrida** (AES-256-GCM + RSA)
-- **Arquitectura Clean Code** con DTOs y DAOs
-- **Dockerización** con Docker Compose
-- **Tests unitarios** con Jest
+- **JWT Authentication** with refresh tokens
+- **User roles** (admin, salesperson)
+- **Complete CRUD** for products, clients and orders
+- **Centralized validations** with express-validator
+- **Complete Swagger documentation**
+- **Hybrid encryption** (AES-256-GCM + RSA)
+- **Clean Code architecture** with DTOs and DAOs
+- **Dockerization** with Docker Compose
+- **Unit tests** with Jest
 
-## 📋 Requisitos
+## 📋 Requirements
 
 - Node.js 18+ 
-- Docker y Docker Compose
-- PostgreSQL (incluido en Docker Compose)
+- Docker and Docker Compose
+- PostgreSQL (included in Docker Compose)
 
-## 🛠️ Instalación
+## 🛠️ Installation
 
-### Opción 1: Docker Compose (Recomendado)
+### Option 1: Docker Compose (Recommended)
 
-1. **Clonar el repositorio**
+1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd user-stories-node
    ```
 
-2. **Configurar variables de entorno**
+2. **Configure environment variables**
    ```bash
    cp .env.example .env
    ```
    
-   Editar `.env` con tus valores:
+   Edit `.env` with your values:
    ```env
    DATABASE_URI=postgresql://postgres:password@localhost:5432/sportsline
    JWT_SECRET=your_jwt_secret_key_here
@@ -44,109 +44,115 @@ API completa para gestión de productos, clientes, usuarios y pedidos de SportsL
    RSA_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----...-----END RSA PRIVATE KEY-----
    ```
 
-3. **Ejecutar con Docker Compose**
+3. **Run with Docker Compose**
    ```bash
    docker-compose up --build
    ```
 
-   El servicio estará disponible en `http://localhost:3000`
+   The service will be available at `http://localhost:3000`
 
-### Opción 2: Instalación Local
+### Option 2: Local Installation
 
-1. **Instalar dependencias**
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. **Configurar base de datos PostgreSQL**
-   - Crear base de datos `sportsline`
-   - Configurar `.env` con la URI de conexión
+2. **Configure PostgreSQL database**
+   - Create `sportsline` database
+   - Configure `.env` with the connection URI
 
-3. **Ejecutar migraciones y seeds**
+3. **Run migrations and seeds**
    ```bash
    npm run seed
    ```
 
-4. **Iniciar servidor de desarrollo**
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
 ## 🐳 Docker
 
-### Construcción de imagen
+### Image building
 
 ```bash
 docker build -t sportsline-api .
 ```
 
-### Ejecución con Docker Compose
+### Running with Docker Compose
 
 ```bash
-# Iniciar servicios
+# Start services
 docker-compose up -d
 
-# Ver logs
+# View logs
 docker-compose logs -f
 
-# Detener servicios
+# Stop services
 docker-compose down
 
-# Reconstruir y ejecutar
+# Rebuild and run
 docker-compose up --build
 ```
 
-### Configuración de recursos
+### Resource configuration
 
-El `docker-compose.yml` incluye límites de recursos:
-- **CPU**: 0.5 cores máximo, 0.25 cores reservados
-- **RAM**: 512MB máximo, 256MB reservados
+The `docker-compose.yml` includes resource limits:
+- **CPU**: 0.5 cores maximum, 0.25 cores reserved
+- **RAM**: 512MB maximum, 256MB reserved
 
 ## 📚 API Documentation
 
 ### Swagger UI
 
-Una vez iniciado el servidor, accede a la documentación interactiva:
+Once the server is started, access the interactive documentation:
 
 ```
 http://localhost:3000/api-docs
 ```
 
-### Endpoints principales
+### Available documentation
 
-#### Autenticación
-- `POST /auth/register` - Registrar usuario
-- `POST /auth/login` - Iniciar sesión
-- `POST /auth/refresh` - Renovar token
+- **Swagger YAML**: `swagger.yaml` - Complete documentation in OpenAPI 3.0 format
+- **Swagger TypeScript**: `src/config/swagger.ts` - Programmatic configuration
+- **Web interface**: Interactive documentation with examples
 
-#### Productos
-- `GET /products` - Listar productos
-- `GET /products/:id` - Obtener producto
-- `POST /products` - Crear producto (admin)
-- `PUT /products/:id` - Actualizar producto (admin)
-- `DELETE /products/:id` - Eliminar producto (admin)
+### Main endpoints
 
-#### Clientes
-- `GET /clients` - Listar clientes
-- `GET /clients/:id` - Obtener cliente
-- `POST /clients` - Crear cliente (admin)
-- `PUT /clients/:id` - Actualizar cliente (admin)
-- `DELETE /clients/:id` - Eliminar cliente (admin)
+#### Authentication
+- `POST /auth/register` - Register user
+- `POST /auth/login` - Login
+- `POST /auth/refresh` - Refresh token
 
-#### Pedidos
-- `GET /orders` - Listar pedidos
-- `GET /orders/:id` - Obtener pedido
-- `GET /orders/client/:clienteId` - Pedidos por cliente
-- `GET /orders/product/:productoId` - Pedidos por producto
-- `POST /orders` - Crear pedido (vendedor)
-- `PUT /orders/:id/status` - Actualizar estado (admin)
+#### Products
+- `GET /products` - List products
+- `GET /products/:id` - Get product
+- `POST /products` - Create product (admin)
+- `PUT /products/:id` - Update product (admin)
+- `DELETE /products/:id` - Delete product (admin)
 
-#### Salud del sistema
+#### Clients
+- `GET /clients` - List clients
+- `GET /clients/:id` - Get client
+- `POST /clients` - Create client (admin)
+- `PUT /clients/:id` - Update client (admin)
+- `DELETE /clients/:id` - Delete client (admin)
+
+#### Orders
+- `GET /orders` - List orders
+- `GET /orders/:id` - Get order
+- `GET /orders/client/:clienteId` - Orders by client
+- `GET /orders/product/:productoId` - Orders by product
+- `POST /orders` - Create order (salesperson)
+- `PUT /orders/:id/status` - Update status (admin)
+
+#### System health
 - `GET /health` - Health check
 
-## 🔐 Autenticación
+## 🔐 Authentication
 
-### Registro de usuario
+### User registration
 
 ```bash
 curl -X POST http://localhost:3000/auth/register \
@@ -170,7 +176,7 @@ curl -X POST http://localhost:3000/auth/login \
   }'
 ```
 
-### Uso de tokens
+### Using tokens
 
 ```bash
 curl -X GET http://localhost:3000/products \
@@ -179,126 +185,136 @@ curl -X GET http://localhost:3000/products \
 
 ## 🧪 Testing
 
-### Ejecutar tests
+### Run tests
 
 ```bash
-# Tests unitarios
+# Unit tests
 npm test
 
-# Tests con coverage
+# Tests with coverage
 npm run test:coverage
+
+# Tests in watch mode
+npm run test:watch
 ```
 
-### Coverage mínimo requerido
+### Current coverage
+
+- **Branches**: 11.11% (in development)
+- **Functions**: 24.32% (in development)
+- **Lines**: 44.46% ✅
+- **Statements**: 44.7% ✅
+
+### Minimum coverage required
 
 - **Branches**: 40%
 - **Functions**: 40%
 - **Lines**: 40%
 - **Statements**: 40%
 
-## 📁 Estructura del proyecto
+## 📁 Project structure
 
 ```
 src/
-├── config/           # Configuraciones (DB, Swagger)
-├── controllers/      # Controladores de rutas
+├── config/           # Configurations (DB, Swagger)
+├── controllers/      # Route controllers
 ├── dao/             # Data Access Objects
 ├── dto/             # Data Transfer Objects
 ├── middlewares/     # Middlewares (auth, validation)
-├── models/          # Modelos de Sequelize
-├── routes/          # Definición de rutas
-├── services/        # Lógica de negocio
-├── utils/           # Utilidades (crypto, validation)
-├── validators/      # Validaciones de entrada
-├── seeds/           # Datos iniciales
-└── __tests__/       # Tests unitarios
+├── models/          # Sequelize models
+├── routes/          # Route definitions
+├── services/        # Business logic
+├── utils/           # Utilities (crypto, validation)
+├── validators/      # Input validations
+├── seeds/           # Initial data
+└── __tests__/       # Unit tests
 ```
 
-## 🔧 Scripts disponibles
+## 🔧 Available scripts
 
 ```bash
-npm run dev          # Servidor de desarrollo
-npm run build        # Compilar TypeScript
-npm start           # Servidor de producción
-npm test            # Ejecutar tests
-npm run test:coverage # Tests con coverage
-npm run seed        # Ejecutar seeds
+npm run dev          # Development server
+npm run build        # Compile TypeScript
+npm start           # Production server
+npm test            # Run tests
+npm run test:coverage # Tests with coverage
+npm run seed        # Run seeds
 ```
 
-## 🌍 Variables de entorno
+## 🌍 Environment variables
 
-| Variable | Descripción | Requerido |
+| Variable | Description | Required |
 |----------|-------------|-----------|
-| `DATABASE_URI` | URI de conexión a PostgreSQL | ✅ |
-| `JWT_SECRET` | Clave secreta para JWT | ✅ |
-| `JWT_REFRESH_SECRET` | Clave secreta para refresh tokens | ✅ |
-| `RSA_PUBLIC_KEY` | Clave pública RSA para encriptación | ✅ |
-| `RSA_PRIVATE_KEY` | Clave privada RSA para encriptación | ✅ |
-| `NODE_ENV` | Entorno de ejecución | ❌ |
-| `PORT` | Puerto del servidor (default: 3000) | ❌ |
+| `DATABASE_URI` | PostgreSQL connection URI | ✅ |
+| `JWT_SECRET` | Secret key for JWT | ✅ |
+| `JWT_REFRESH_SECRET` | Secret key for refresh tokens | ✅ |
+| `RSA_PUBLIC_KEY` | RSA public key for encryption | ✅ |
+| `RSA_PRIVATE_KEY` | RSA private key for encryption | ✅ |
+| `NODE_ENV` | Execution environment | ❌ |
+| `PORT` | Server port (default: 3000) | ❌ |
 
-## 🔒 Seguridad
+## 🔒 Security
 
-- **Autenticación JWT** con tokens de acceso y renovación
-- **Autorización basada en roles** (admin, vendedor)
-- **Encriptación híbrida** para datos sensibles
-- **Validación de entrada** con express-validator
-- **Sanitización de datos** en todos los endpoints
+- **JWT authentication** with access and refresh tokens
+- **Role-based authorization** (admin, salesperson)
+- **Hybrid encryption** for sensitive data
+- **Input validation** with express-validator
+- **Data sanitization** in all endpoints
 - **Rate limiting** (configurable)
 
-## 🚀 Despliegue
+## 🚀 Deployment
 
-### Producción con Docker
+### Production with Docker
 
-1. **Configurar variables de entorno de producción**
-2. **Construir imagen optimizada**
+1. **Configure production environment variables**
+2. **Build optimized image**
    ```bash
    docker build -t sportsline-api:prod .
    ```
-3. **Ejecutar con Docker Compose**
+3. **Run with Docker Compose**
    ```bash
    docker-compose -f docker-compose.prod.yml up -d
    ```
 
-### Monitoreo
+### Monitoring
 
 - **Health check**: `GET /health`
 - **Logs**: `docker-compose logs -f`
-- **Métricas**: Integración con herramientas de monitoreo
+- **Metrics**: Integration with monitoring tools
 
-## 🤝 Contribución
+## 🤝 Contributing
 
-1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abrir Pull Request
+1. Fork the project
+2. Create feature branch (`git checkout -b feature/new-feature`)
+3. Commit changes (`git commit -m 'feat: add new feature'`)
+4. Push to branch (`git push origin feature/new-feature`)
+5. Open Pull Request
 
-## 📝 Licencia
+## 📝 License
 
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+This project is under the MIT License. See `LICENSE` for more details.
 
-## 👥 Equipo
+## 👥 Team
 
-- **Desarrollo**: SportsLine Development Team
+- **Development**: SportsLine Development Team
 - **Email**: dev@sportsline.local
 
-## 🆘 Soporte
+## 🆘 Support
 
-Para soporte técnico o preguntas:
+For technical support or questions:
 
 - **Email**: support@sportsline.local
-- **Documentación**: http://localhost:3000/api-docs
+- **Documentation**: http://localhost:3000/api-docs
 - **Issues**: GitHub Issues
 
 ---
 
-## 📊 Estado del proyecto
+## 📊 Project status
 
-- ✅ **HU1**: Configuración inicial del proyecto
-- ✅ **HU2**: Autenticación y roles de usuario  
-- ✅ **HU3**: Gestión de productos y clientes
-- ✅ **HU4**: Gestión de pedidos y validaciones
-- ✅ **HU5**: Calidad, seguridad y despliegue
+- ✅ **HU1**: Initial project setup
+- ✅ **HU2**: Authentication and user roles  
+- ✅ **HU3**: Product and client management
+- ✅ **HU4**: Order management and validations
+- ✅ **HU5**: Quality, security and deployment
 
-**Proyecto completado al 100%** 🎉
+**Project 100% complete** 🎉

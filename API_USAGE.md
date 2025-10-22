@@ -1,10 +1,10 @@
-# SportsLine API - Guía de Uso
+# SportsLine API - Usage Guide
 
-## 🚀 Inicio Rápido
+## 🚀 Quick Start
 
-### 1. Autenticación
+### 1. Authentication
 
-#### Registrar un usuario administrador
+#### Register an admin user
 ```bash
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
@@ -16,7 +16,7 @@ curl -X POST http://localhost:3000/auth/register \
   }'
 ```
 
-#### Registrar un vendedor
+#### Register a salesperson
 ```bash
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
@@ -28,7 +28,7 @@ curl -X POST http://localhost:3000/auth/register \
   }'
 ```
 
-#### Iniciar sesión
+#### Login
 ```bash
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
@@ -38,7 +38,7 @@ curl -X POST http://localhost:3000/auth/login \
   }'
 ```
 
-**Respuesta:**
+**Response:**
 ```json
 {
   "user": {
@@ -52,15 +52,15 @@ curl -X POST http://localhost:3000/auth/login \
 }
 ```
 
-### 2. Gestión de Productos
+### 2. Product Management
 
-#### Listar productos
+#### List products
 ```bash
 curl -X GET http://localhost:3000/products \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-#### Crear producto (solo admin)
+#### Create product (admin only)
 ```bash
 curl -X POST http://localhost:3000/products \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -73,7 +73,7 @@ curl -X POST http://localhost:3000/products \
   }'
 ```
 
-#### Actualizar producto (solo admin)
+#### Update product (admin only)
 ```bash
 curl -X PUT http://localhost:3000/products/1 \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -85,9 +85,9 @@ curl -X PUT http://localhost:3000/products/1 \
   }'
 ```
 
-### 3. Gestión de Clientes
+### 3. Client Management
 
-#### Crear cliente (solo admin)
+#### Create client (admin only)
 ```bash
 curl -X POST http://localhost:3000/clients \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -99,15 +99,15 @@ curl -X POST http://localhost:3000/clients \
   }'
 ```
 
-#### Listar clientes
+#### List clients
 ```bash
 curl -X GET http://localhost:3000/clients \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-### 4. Gestión de Pedidos
+### 4. Order Management
 
-#### Crear pedido (solo vendedor)
+#### Create order (salesperson only)
 ```bash
 curl -X POST http://localhost:3000/orders \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -127,13 +127,13 @@ curl -X POST http://localhost:3000/orders \
   }'
 ```
 
-#### Listar pedidos
+#### List orders
 ```bash
 curl -X GET http://localhost:3000/orders \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-#### Actualizar estado del pedido (solo admin)
+#### Update order status (admin only)
 ```bash
 curl -X PUT http://localhost:3000/orders/1/status \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -143,69 +143,69 @@ curl -X PUT http://localhost:3000/orders/1/status \
   }'
 ```
 
-### 5. Consultas Avanzadas
+### 5. Advanced Queries
 
-#### Pedidos por cliente
+#### Orders by client
 ```bash
 curl -X GET http://localhost:3000/orders/client/1 \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-#### Pedidos por producto
+#### Orders by product
 ```bash
 curl -X GET http://localhost:3000/orders/product/1 \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-## 🔐 Roles y Permisos
+## 🔐 Roles and Permissions
 
-### Administrador (admin)
-- ✅ Crear, actualizar y eliminar productos
-- ✅ Crear, actualizar y eliminar clientes
-- ✅ Actualizar estados de pedidos
-- ✅ Ver todos los recursos
+### Administrator (admin)
+- ✅ Create, update and delete products
+- ✅ Create, update and delete clients
+- ✅ Update order statuses
+- ✅ View all resources
 
-### Vendedor (vendedor)
-- ✅ Ver productos y clientes
-- ✅ Crear pedidos
-- ✅ Ver pedidos
-- ❌ No puede modificar productos o clientes
-- ❌ No puede cambiar estados de pedidos
+### Salesperson (vendedor)
+- ✅ View products and clients
+- ✅ Create orders
+- ✅ View orders
+- ❌ Cannot modify products or clients
+- ❌ Cannot change order statuses
 
-## 📊 Estados de Pedidos
+## 📊 Order Statuses
 
-- `pendiente` - Pedido creado, esperando confirmación
-- `confirmado` - Pedido confirmado por administrador
-- `enviado` - Pedido enviado al cliente
-- `entregado` - Pedido entregado exitosamente
-- `cancelado` - Pedido cancelado
+- `pendiente` - Order created, awaiting confirmation
+- `confirmado` - Order confirmed by administrator
+- `enviado` - Order shipped to customer
+- `entregado` - Order successfully delivered
+- `cancelado` - Order cancelled
 
-## 🚨 Manejo de Errores
+## 🚨 Error Handling
 
-### Errores comunes
+### Common errors
 
-#### 401 - No autorizado
+#### 401 - Unauthorized
 ```json
 {
   "message": "Token de acceso inválido"
 }
 ```
 
-#### 403 - Acceso denegado
+#### 403 - Access denied
 ```json
 {
   "message": "Acceso denegado"
 }
 ```
 
-#### 404 - Recurso no encontrado
+#### 404 - Resource not found
 ```json
 {
   "message": "Producto no encontrado"
 }
 ```
 
-#### 400 - Error de validación
+#### 400 - Validation error
 ```json
 {
   "message": "Error de validación",
@@ -219,9 +219,9 @@ curl -X GET http://localhost:3000/orders/product/1 \
 }
 ```
 
-## 🔄 Renovación de Tokens
+## 🔄 Token Refresh
 
-Cuando el token de acceso expire, usa el refresh token:
+When the access token expires, use the refresh token:
 
 ```bash
 curl -X POST http://localhost:3000/auth/refresh \
@@ -231,14 +231,14 @@ curl -X POST http://localhost:3000/auth/refresh \
   }'
 ```
 
-## 📈 Monitoreo
+## 📈 Monitoring
 
 ### Health Check
 ```bash
 curl -X GET http://localhost:3000/health
 ```
 
-**Respuesta:**
+**Response:**
 ```json
 {
   "status": "ok",
@@ -250,7 +250,7 @@ curl -X GET http://localhost:3000/health
 
 ## 🧪 Testing
 
-### Ejecutar tests
+### Run tests
 ```bash
 npm test
 ```
@@ -260,12 +260,12 @@ npm test
 npm run test:coverage
 ```
 
-## 📚 Documentación Interactiva
+## 📚 Interactive Documentation
 
-Accede a Swagger UI en: `http://localhost:3000/api-docs`
+Access Swagger UI at: `http://localhost:3000/api-docs`
 
-Aquí podrás:
-- Ver todos los endpoints disponibles
-- Probar la API directamente desde el navegador
-- Ver ejemplos de request/response
-- Descargar la especificación OpenAPI
+Here you can:
+- View all available endpoints
+- Test the API directly from the browser
+- See request/response examples
+- Download the OpenAPI specification

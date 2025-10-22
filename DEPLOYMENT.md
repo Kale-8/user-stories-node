@@ -1,15 +1,15 @@
-# SportsLine API - Guía de Despliegue
+# SportsLine API - Deployment Guide
 
-## 🚀 Despliegue con Docker
+## 🚀 Docker Deployment
 
-### 1. Preparación del entorno
+### 1. Environment Setup
 
-#### Variables de entorno de producción
+#### Production environment variables
 ```bash
-# Crear archivo .env para producción
+# Create .env file for production
 cp .env.example .env.prod
 
-# Configurar variables de producción
+# Configure production variables
 DATABASE_URI=postgresql://postgres:secure_password@db:5432/sportsline_prod
 JWT_SECRET=your_super_secure_jwt_secret_for_production
 JWT_REFRESH_SECRET=your_super_secure_refresh_secret_for_production
@@ -17,9 +17,9 @@ NODE_ENV=production
 PORT=3000
 ```
 
-#### Generar claves RSA
+#### Generate RSA keys
 ```bash
-# Generar par de claves RSA para producción
+# Generate RSA key pair for production
 node -e "
 const crypto = require('crypto');
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
@@ -32,35 +32,35 @@ console.log('RSA_PRIVATE_KEY=' + privateKey);
 "
 ```
 
-### 2. Despliegue con Docker Compose
+### 2. Docker Compose Deployment
 
-#### Desarrollo
+#### Development
 ```bash
-# Iniciar servicios de desarrollo
+# Start development services
 docker-compose up --build
 
-# Ver logs
+# View logs
 docker-compose logs -f
 
-# Detener servicios
+# Stop services
 docker-compose down
 ```
 
-#### Producción
+#### Production
 ```bash
-# Usar configuración de producción
+# Use production configuration
 docker-compose -f docker-compose.prod.yml up -d
 
-# Ver logs de producción
+# View production logs
 docker-compose -f docker-compose.prod.yml logs -f
 
-# Detener servicios de producción
+# Stop production services
 docker-compose -f docker-compose.prod.yml down
 ```
 
-### 3. Configuración de recursos
+### 3. Resource Configuration
 
-#### Desarrollo (docker-compose.yml)
+#### Development (docker-compose.yml)
 ```yaml
 deploy:
   resources:
@@ -72,7 +72,7 @@ deploy:
       memory: '256M'
 ```
 
-#### Producción (docker-compose.prod.yml)
+#### Production (docker-compose.prod.yml)
 ```yaml
 deploy:
   resources:
@@ -86,28 +86,28 @@ deploy:
 
 ## 🐳 Docker Commands
 
-### Construcción de imagen
+### Image Building
 ```bash
-# Construir imagen
+# Build image
 docker build -t sportsline-api .
 
-# Construir con tag específico
+# Build with specific tag
 docker build -t sportsline-api:v1.0.0 .
 
-# Construir sin cache
+# Build without cache
 docker build --no-cache -t sportsline-api .
 ```
 
-### Ejecución de contenedor
+### Container Execution
 ```bash
-# Ejecutar contenedor
+# Run container
 docker run -d \
   --name sportsline-api \
   -p 3000:3000 \
   --env-file .env \
   sportsline-api
 
-# Ejecutar con logs
+# Run with logs
 docker run -it --rm \
   --name sportsline-api \
   -p 3000:3000 \
@@ -115,29 +115,29 @@ docker run -it --rm \
   sportsline-api
 ```
 
-### Gestión de contenedores
+### Container Management
 ```bash
-# Ver contenedores en ejecución
+# View running containers
 docker ps
 
-# Ver logs
+# View logs
 docker logs sportsline-api
 
-# Detener contenedor
+# Stop container
 docker stop sportsline-api
 
-# Eliminar contenedor
+# Remove container
 docker rm sportsline-api
 
-# Ejecutar comando en contenedor
+# Execute command in container
 docker exec -it sportsline-api sh
 ```
 
-## 🌐 Despliegue en la Nube
+## 🌐 Cloud Deployment
 
 ### AWS ECS
 
-#### 1. Crear task definition
+#### 1. Create task definition
 ```json
 {
   "family": "sportsline-api",
@@ -181,12 +181,12 @@ docker exec -it sportsline-api sh
 }
 ```
 
-#### 2. Desplegar servicio
+#### 2. Deploy service
 ```bash
-# Crear cluster
+# Create cluster
 aws ecs create-cluster --cluster-name sportsline-cluster
 
-# Crear servicio
+# Create service
 aws ecs create-service \
   --cluster sportsline-cluster \
   --service-name sportsline-api \
@@ -198,15 +198,15 @@ aws ecs create-service \
 
 ### Google Cloud Run
 
-#### 1. Construir y subir imagen
+#### 1. Build and upload image
 ```bash
-# Configurar proyecto
+# Configure project
 gcloud config set project your-project-id
 
-# Construir imagen
+# Build image
 gcloud builds submit --tag gcr.io/your-project-id/sportsline-api
 
-# Desplegar servicio
+# Deploy service
 gcloud run deploy sportsline-api \
   --image gcr.io/your-project-id/sportsline-api \
   --platform managed \
@@ -219,12 +219,12 @@ gcloud run deploy sportsline-api \
 
 ### Azure Container Instances
 
-#### 1. Desplegar contenedor
+#### 1. Deploy container
 ```bash
-# Crear grupo de recursos
+# Create resource group
 az group create --name sportsline-rg --location eastus
 
-# Desplegar contenedor
+# Deploy container
 az container create \
   --resource-group sportsline-rg \
   --name sportsline-api \
@@ -236,11 +236,11 @@ az container create \
   --memory 1
 ```
 
-## 🔒 Seguridad en Producción
+## 🔒 Production Security
 
-### 1. Variables de entorno seguras
+### 1. Secure environment variables
 ```bash
-# Usar secretos de Docker
+# Use Docker secrets
 docker run -d \
   --name sportsline-api \
   -p 3000:3000 \
@@ -250,7 +250,7 @@ docker run -d \
 
 ### 2. HTTPS/TLS
 ```bash
-# Usar reverse proxy con SSL
+# Use reverse proxy with SSL
 docker run -d \
   --name nginx-proxy \
   -p 80:80 -p 443:443 \
@@ -259,33 +259,33 @@ docker run -d \
   jwilder/nginx-proxy
 ```
 
-### 3. Monitoreo y logging
+### 3. Monitoring and logging
 ```bash
-# Usar ELK stack para logs
+# Use ELK stack for logs
 docker-compose -f docker-compose.monitoring.yml up -d
 ```
 
-## 📊 Monitoreo
+## 📊 Monitoring
 
 ### Health Checks
 ```bash
-# Verificar salud del servicio
+# Check service health
 curl -f http://localhost:3000/health
 
-# Health check con Docker
+# Health check with Docker
 docker exec sportsline-api curl -f http://localhost:3000/health
 ```
 
-### Métricas
+### Metrics
 ```bash
-# Instalar herramientas de monitoreo
+# Install monitoring tools
 npm install --save prom-client
 
-# Configurar métricas
+# Configure metrics
 const promClient = require('prom-client');
 const register = new promClient.Registry();
 
-// Endpoint de métricas
+// Metrics endpoint
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(register.metrics());
@@ -324,20 +324,20 @@ jobs:
 
 ## 🚨 Troubleshooting
 
-### Problemas comunes
+### Common Issues
 
-#### 1. Error de conexión a base de datos
+#### 1. Database connection error
 ```bash
-# Verificar conectividad
+# Check connectivity
 docker exec sportsline-api ping db
 
-# Verificar variables de entorno
+# Check environment variables
 docker exec sportsline-api env | grep DATABASE
 ```
 
-#### 2. Error de memoria
+#### 2. Memory error
 ```bash
-# Aumentar límite de memoria
+# Increase memory limit
 docker run -d \
   --name sportsline-api \
   --memory=2g \
@@ -345,29 +345,29 @@ docker run -d \
   sportsline-api
 ```
 
-#### 3. Error de CPU
+#### 3. CPU error
 ```bash
-# Aumentar límite de CPU
+# Increase CPU limit
 docker run -d \
   --name sportsline-api \
   --cpus=2 \
   sportsline-api
 ```
 
-### Logs de debugging
+### Debugging logs
 ```bash
-# Ver logs detallados
+# View detailed logs
 docker logs --tail 100 -f sportsline-api
 
-# Logs con timestamps
+# Logs with timestamps
 docker logs --timestamps -f sportsline-api
 ```
 
-## 📈 Escalabilidad
+## 📈 Scalability
 
 ### Horizontal scaling
 ```bash
-# Escalar servicio
+# Scale service
 docker-compose up --scale app=3
 
 # Load balancer
@@ -380,7 +380,7 @@ docker run -d \
 
 ### Vertical scaling
 ```bash
-# Aumentar recursos
+# Increase resources
 docker run -d \
   --name sportsline-api \
   --cpus=4 \

@@ -1,6 +1,7 @@
 import { sequelize } from '../config/database';
 import { Usuario } from '../models/Usuario';
 import { Producto } from '../models/Producto';
+import bcrypt from 'bcryptjs';
 
 async function run(): Promise<void> {
   await sequelize.authenticate();
@@ -11,7 +12,7 @@ async function run(): Promise<void> {
     defaults: {
       nombre: 'Admin',
       email: 'admin@sportsline.local',
-      passwordHash: 'hashed:admin123',
+      passwordHash: await bcrypt.hash('admin123', 10),
       rol: 'admin',
     },
   });

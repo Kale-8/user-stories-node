@@ -9,7 +9,7 @@ export class AuthController extends BaseController {
       const result = await AuthService.register(req.body);
       return res.status(HTTP_STATUS.CREATED).json(result);
     } catch (err: any) {
-      return this.handleError(res, err, 'Error en registro', HTTP_STATUS.BAD_REQUEST);
+      return BaseController.handleError(res, err, 'Error en registro', HTTP_STATUS.BAD_REQUEST);
     }
   }
 
@@ -18,7 +18,7 @@ export class AuthController extends BaseController {
       const result = await AuthService.login(req.body);
       return res.json(result);
     } catch (err: any) {
-      return this.handleError(res, err, 'Error en login', HTTP_STATUS.BAD_REQUEST);
+      return BaseController.handleError(res, err, 'Error en login', HTTP_STATUS.BAD_REQUEST);
     }
   }
 
@@ -31,7 +31,7 @@ export class AuthController extends BaseController {
       const result = await AuthService.refreshToken(refreshToken);
       return res.json(result);
     } catch (err: any) {
-      return this.handleError(res, err, 'Error en refresh', HTTP_STATUS.UNAUTHORIZED);
+      return BaseController.handleError(res, err, 'Error en refresh', HTTP_STATUS.UNAUTHORIZED);
     }
   }
 }

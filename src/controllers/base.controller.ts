@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
 export class BaseController {
@@ -7,7 +7,10 @@ export class BaseController {
     return res.status(statusCode).json({ message });
   }
 
-  protected static validateId(id: string): { isValid: boolean; parsedId?: number; error?: string } {
+  protected static validateId(id: string | undefined): { isValid: boolean; parsedId?: number; error?: string } {
+    if (!id) {
+      return { isValid: false, error: ERROR_MESSAGES.INVALID_ID };
+    }
     const parsedId = parseInt(id);
     if (isNaN(parsedId)) {
       return { isValid: false, error: ERROR_MESSAGES.INVALID_ID };
@@ -19,10 +22,11 @@ export class BaseController {
     res: Response, 
     findOperation: () => Promise<T | null>, 
     notFoundMessage: string = ERROR_MESSAGES.RESOURCE_NOT_FOUND
-  ): Promise<Response | T> {
+  ): Promise<T | null> {
     const result = await findOperation();
     if (!result) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({ message: notFoundMessage });
+      res.status(HTTP_STATUS.NOT_FOUND).json({ message: notFoundMessage });
+      return null;
     }
     return result;
   }

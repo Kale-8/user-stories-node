@@ -1,94 +1,98 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { OrderService } from '../services/order.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
+import { BaseController } from './base.controller';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
-export class OrderController {
+export class OrderController extends BaseController {
   static async getAllOrders(req: AuthenticatedRequest, res: Response) {
     try {
       const orders = await OrderService.getAllOrders();
       return res.json(orders);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener pedidos' });
+      return BaseController.handleError(res, err, 'Error al obtener pedidos');
     }
   }
 
   static async getOrderById(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = BaseController.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const order = await OrderService.getOrderById(id);
-      if (!order) {
-        return res.status(404).json({ message: 'Pedido no encontrado' });
-      }
+      const order = await BaseController.handleNotFound(
+        res,
+        () => OrderService.getOrderById(validation.parsedId!),
+        ERROR_MESSAGES.ORDER_NOT_FOUND
+      );
 
+      if (!order) return; // Response already sent
       return res.json(order);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener pedido' });
+      return BaseController.handleError(res, err, 'Error al obtener pedido');
     }
   }
 
   static async getOrdersByClient(req: Request, res: Response) {
     try {
-      const clienteId = parseInt(req.params.clienteId);
-      if (isNaN(clienteId)) {
-        return res.status(400).json({ message: 'ID de cliente inválido' });
+      const validation = BaseController.validateId(req.params.clienteId);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'ID de cliente inválido' });
       }
 
-      const orders = await OrderService.getOrdersByClientId(clienteId);
+      const orders = await OrderService.getOrdersByClientId(validation.parsedId!);
       return res.json(orders);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener pedidos del cliente' });
+      return BaseController.handleError(res, err, 'Error al obtener pedidos del cliente');
     }
   }
 
   static async getOrdersByProduct(req: Request, res: Response) {
     try {
-      const productoId = parseInt(req.params.productoId);
-      if (isNaN(productoId)) {
-        return res.status(400).json({ message: 'ID de producto inválido' });
+      const validation = BaseController.validateId(req.params.productoId);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'ID de producto inválido' });
       }
 
-      const orders = await OrderService.getOrdersByProductId(productoId);
+      const orders = await OrderService.getOrdersByProductId(validation.parsedId!);
       return res.json(orders);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener pedidos del producto' });
+      return BaseController.handleError(res, err, 'Error al obtener pedidos del producto');
     }
   }
 
   static async createOrder(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: 'Usuario no autenticado' });
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Usuario no autenticado' });
       }
 
       const order = await OrderService.createOrder(req.body, req.user.userId);
-      return res.status(201).json(order);
+      return res.status(HTTP_STATUS.CREATED).json(order);
     } catch (err: any) {
-      if (err.message.includes('Stock insuficiente') || err.message.includes('no encontrado')) {
-        return res.status(400).json({ message: err.message });
-      }
-      return res.status(500).json({ message: err.message || 'Error al crear pedido' });
+      const statusCode = err.message.includes('Stock insuficiente') || err.message.includes('no encontrado') ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      return BaseController.handleError(res, err, 'Error al crear pedido', statusCode);
     }
   }
 
   static async updateOrderStatus(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = BaseController.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const order = await OrderService.updateOrderStatus(id, req.body);
-      if (!order) {
-        return res.status(404).json({ message: 'Pedido no encontrado' });
-      }
+      const order = await BaseController.handleNotFound(
+        res,
+        () => OrderService.updateOrderStatus(validation.parsedId!, req.body),
+        ERROR_MESSAGES.ORDER_NOT_FOUND
+      );
 
+      if (!order) return; // Response already sent
       return res.json(order);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al actualizar estado del pedido' });
+      return BaseController.handleError(res, err, 'Error al actualizar estado del pedido');
     }
   }
 }

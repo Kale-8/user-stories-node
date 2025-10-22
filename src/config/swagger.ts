@@ -1,5 +1,8 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
+import yaml from 'js-yaml';
 
 const options = {
   definition: {
@@ -464,5 +467,19 @@ const options = {
   apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
 };
 
-export const specs = swaggerJsdoc(options);
+// Función para cargar swagger desde YAML
+function loadSwaggerFromYaml(): any {
+  try {
+    const yamlPath = path.join(process.cwd(), 'swagger.yaml');
+    const fileContents = fs.readFileSync(yamlPath, 'utf8');
+    return yaml.load(fileContents);
+  } catch (error) {
+    console.warn('No se pudo cargar swagger.yaml, usando configuración TypeScript');
+    return null;
+  }
+}
+
+// Intentar cargar desde YAML primero, si no existe usar la configuración TypeScript
+const yamlSpecs = loadSwaggerFromYaml();
+export const specs = yamlSpecs || swaggerJsdoc(options);
 export { swaggerUi };

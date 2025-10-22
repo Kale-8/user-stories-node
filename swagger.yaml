@@ -1,0 +1,939 @@
+openapi: 3.0.0
+info:
+  title: SportsLine API
+  description: API REST para gestión de productos deportivos, clientes y pedidos
+  version: 1.0.0
+  contact:
+    name: SportsLine Team
+    email: admin@sportsline.local
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+  - url: https://api.sportsline.com
+    description: Servidor de producción
+tags:
+  - name: auth
+    description: Autenticación y autorización
+  - name: products
+    description: Gestión de productos
+  - name: clients
+    description: Gestión de clientes
+  - name: orders
+    description: Gestión de pedidos
+  - name: system
+    description: Sistema y salud
+paths:
+  /health:
+    get:
+      tags:
+        - system
+      summary: Health check
+      description: Verifica el estado del servidor
+      responses:
+        '200':
+          description: Servidor funcionando correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    example: 123.456
+                  environment:
+                    type: string
+                    example: development
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Iniciar sesión
+      description: Autentica un usuario y devuelve tokens JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@sportsline.local
+                password:
+                  type: string
+                  example: admin123
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      nombre:
+                        type: string
+                        example: Admin
+                      email:
+                        type: string
+                        example: admin@sportsline.local
+                      rol:
+                        type: string
+                        enum: [admin, vendedor]
+                        example: admin
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Registrar usuario
+      description: Registra un nuevo usuario en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - email
+                - password
+                - rol
+              properties:
+                nombre:
+                  type: string
+                  example: Juan Vendedor
+                email:
+                  type: string
+                  format: email
+                  example: juan@sportsline.local
+                password:
+                  type: string
+                  example: vendedor123
+                rol:
+                  type: string
+                  enum: [admin, vendedor]
+                  example: vendedor
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 2
+                      nombre:
+                        type: string
+                        example: Juan Vendedor
+                      email:
+                        type: string
+                        example: juan@sportsline.local
+                      rol:
+                        type: string
+                        example: vendedor
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Email ya registrado o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Renovar token
+      description: Renueva el token de acceso usando el refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Token renovado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Token de renovación inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /products:
+    get:
+      tags:
+        - products
+      summary: Listar productos
+      description: Obtiene la lista de todos los productos
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      tags:
+        - products
+      summary: Crear producto
+      description: Crea un nuevo producto (requiere rol admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - codigo
+                - nombre
+                - precio
+                - stock
+              properties:
+                codigo:
+                  type: string
+                  example: P001
+                nombre:
+                  type: string
+                  example: Balón de fútbol
+                precio:
+                  type: number
+                  format: decimal
+                  example: 25.50
+                stock:
+                  type: integer
+                  example: 100
+      responses:
+        '201':
+          description: Producto creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Código duplicado o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /products/{id}:
+    get:
+      tags:
+        - products
+      summary: Obtener producto por ID
+      description: Obtiene un producto específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - products
+      summary: Actualizar producto
+      description: Actualiza un producto existente (requiere rol admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: Balón de fútbol profesional
+                precio:
+                  type: number
+                  format: decimal
+                  example: 30.00
+                stock:
+                  type: integer
+                  example: 150
+      responses:
+        '200':
+          description: Producto actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - products
+      summary: Eliminar producto
+      description: Elimina un producto (requiere rol admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Producto eliminado exitosamente
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /clients:
+    get:
+      tags:
+        - clients
+      summary: Listar clientes
+      description: Obtiene la lista de todos los clientes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - clients
+      summary: Crear cliente
+      description: Crea un nuevo cliente (requiere rol admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - email
+                - telefono
+              properties:
+                nombre:
+                  type: string
+                  example: Carlos López
+                email:
+                  type: string
+                  format: email
+                  example: carlos@email.com
+                telefono:
+                  type: string
+                  example: +1234567890
+      responses:
+        '201':
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          description: Email duplicado o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /clients/{id}:
+    get:
+      tags:
+        - clients
+      summary: Obtener cliente por ID
+      description: Obtiene un cliente específico por su ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - clients
+      summary: Actualizar cliente
+      description: Actualiza un cliente existente (requiere rol admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: Carlos López Actualizado
+                email:
+                  type: string
+                  format: email
+                  example: carlos.updated@email.com
+                telefono:
+                  type: string
+                  example: +0987654321
+      responses:
+        '200':
+          description: Cliente actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - clients
+      summary: Eliminar cliente
+      description: Elimina un cliente (requiere rol admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Cliente eliminado exitosamente
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders:
+    get:
+      tags:
+        - orders
+      summary: Listar pedidos
+      description: Obtiene la lista de todos los pedidos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de pedidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - orders
+      summary: Crear pedido
+      description: Crea un nuevo pedido (requiere rol vendedor)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clienteId
+                - productos
+              properties:
+                clienteId:
+                  type: integer
+                  example: 1
+                productos:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - productoId
+                      - cantidad
+                    properties:
+                      productoId:
+                        type: integer
+                        example: 1
+                      cantidad:
+                        type: integer
+                        example: 2
+      responses:
+        '201':
+          description: Pedido creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Stock insuficiente o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{id}:
+    get:
+      tags:
+        - orders
+      summary: Obtener pedido por ID
+      description: Obtiene un pedido específico por su ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Pedido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Pedido no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/client/{clienteId}:
+    get:
+      tags:
+        - orders
+      summary: Obtener pedidos por cliente
+      description: Obtiene todos los pedidos de un cliente específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de pedidos del cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/product/{productoId}:
+    get:
+      tags:
+        - orders
+      summary: Obtener pedidos por producto
+      description: Obtiene todos los pedidos que contienen un producto específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productoId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de pedidos del producto
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{id}/status:
+    put:
+      tags:
+        - orders
+      summary: Actualizar estado del pedido
+      description: Actualiza el estado de un pedido (requiere rol admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: string
+                  enum: [pendiente, confirmado, enviado, entregado, cancelado]
+                  example: confirmado
+      responses:
+        '200':
+          description: Estado actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Pedido no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        codigo:
+          type: string
+          example: P001
+        nombre:
+          type: string
+          example: Balón de fútbol
+        precio:
+          type: number
+          format: decimal
+          example: 25.50
+        stock:
+          type: integer
+          example: 100
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Carlos López
+        email:
+          type: string
+          format: email
+          example: carlos@email.com
+        telefono:
+          type: string
+          example: +1234567890
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        clienteId:
+          type: integer
+          example: 1
+        vendedorId:
+          type: integer
+          example: 2
+        total:
+          type: number
+          format: decimal
+          example: 51.00
+        estado:
+          type: string
+          enum: [pendiente, confirmado, enviado, entregado, cancelado]
+          example: pendiente
+        fechaPedido:
+          type: string
+          format: date-time
+        cliente:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            nombre:
+              type: string
+              example: Carlos López
+            email:
+              type: string
+              example: carlos@email.com
+        vendedor:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 2
+            nombre:
+              type: string
+              example: Juan Vendedor
+            email:
+              type: string
+              example: juan@sportsline.local
+        productos:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              cantidad:
+                type: integer
+                example: 2
+              precioUnitario:
+                type: number
+                format: decimal
+                example: 25.50
+              subtotal:
+                type: number
+                format: decimal
+                example: 51.00
+              producto:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  codigo:
+                    type: string
+                    example: P001
+                  nombre:
+                    type: string
+                    example: Balón de fútbol
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Error message
+
+

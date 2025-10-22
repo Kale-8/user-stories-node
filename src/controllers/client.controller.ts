@@ -1,82 +1,83 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ClientService } from '../services/client.service';
+import { BaseController } from './base.controller';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
-export class ClientController {
+export class ClientController extends BaseController {
   static async getAllClients(req: Request, res: Response) {
     try {
       const clients = await ClientService.getAllClients();
       return res.json(clients);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener clientes' });
+      return BaseController.handleError(res, err, 'Error al obtener clientes');
     }
   }
 
   static async getClientById(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = BaseController.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const client = await ClientService.getClientById(id);
-      if (!client) {
-        return res.status(404).json({ message: 'Cliente no encontrado' });
-      }
+      const client = await BaseController.handleNotFound(
+        res,
+        () => ClientService.getClientById(validation.parsedId!),
+        ERROR_MESSAGES.CLIENT_NOT_FOUND
+      );
 
+      if (!client) return; // Response already sent
       return res.json(client);
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al obtener cliente' });
+      return BaseController.handleError(res, err, 'Error al obtener cliente');
     }
   }
 
   static async createClient(req: Request, res: Response) {
     try {
       const client = await ClientService.createClient(req.body);
-      return res.status(201).json(client);
+      return res.status(HTTP_STATUS.CREATED).json(client);
     } catch (err: any) {
-      if (err.message === 'El email del cliente ya existe') {
-        return res.status(400).json({ message: err.message });
-      }
-      return res.status(500).json({ message: err.message || 'Error al crear cliente' });
+      const statusCode = err.message === 'El email del cliente ya existe' ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      return BaseController.handleError(res, err, 'Error al crear cliente', statusCode);
     }
   }
 
   static async updateClient(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = BaseController.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const client = await ClientService.updateClient(id, req.body);
-      if (!client) {
-        return res.status(404).json({ message: 'Cliente no encontrado' });
-      }
+      const client = await BaseController.handleNotFound(
+        res,
+        () => ClientService.updateClient(validation.parsedId!, req.body),
+        ERROR_MESSAGES.CLIENT_NOT_FOUND
+      );
 
+      if (!client) return; // Response already sent
       return res.json(client);
     } catch (err: any) {
-      if (err.message === 'El email del cliente ya existe') {
-        return res.status(400).json({ message: err.message });
-      }
-      return res.status(500).json({ message: err.message || 'Error al actualizar cliente' });
+      return BaseController.handleError(res, err, 'Error al actualizar cliente');
     }
   }
 
   static async deleteClient(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID inválido' });
+      const validation = BaseController.validateId(req.params.id);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: validation.error });
       }
 
-      const deleted = await ClientService.deleteClient(id);
+      const deleted = await ClientService.deleteClient(validation.parsedId!);
       if (!deleted) {
-        return res.status(404).json({ message: 'Cliente no encontrado' });
+        return res.status(HTTP_STATUS.NOT_FOUND).json({ message: ERROR_MESSAGES.CLIENT_NOT_FOUND });
       }
 
-      return res.status(204).send();
+      return res.status(HTTP_STATUS.NO_CONTENT).send();
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || 'Error al eliminar cliente' });
+      return BaseController.handleError(res, err, 'Error al eliminar cliente');
     }
   }
 }

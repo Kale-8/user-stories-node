@@ -198,6 +198,7 @@ export class OrderDAO {
         clienteId: data.clienteId,
         vendedorId: data.vendedorId,
         total,
+        estado: 'pendiente',
         fechaPedido: new Date()
       }, { transaction });
 
@@ -220,12 +221,38 @@ export class OrderDAO {
       }
 
       // Return the created order with all relations
-      const createdOrder = await this.findById(pedido.id);
+      const createdOrder = await Pedido.findByPk(pedido.id, {
+        include: [
+          {
+            model: Cliente,
+            as: 'cliente',
+            attributes: ['id', 'nombre', 'email']
+          },
+          {
+            model: Usuario,
+            as: 'vendedor',
+            attributes: ['id', 'nombre', 'email']
+          },
+          {
+            model: PedidoProducto,
+            as: 'pedidoProductos',
+            include: [
+              {
+                model: Producto,
+                as: 'producto',
+                attributes: ['id', 'codigo', 'nombre']
+              }
+            ]
+          }
+        ],
+        transaction
+      });
+
       if (!createdOrder) {
         throw new Error('Error al crear el pedido');
       }
 
-      return createdOrder;
+      return this.mapToOrderWithProducts(createdOrder);
     });
   }
 
@@ -235,7 +262,7 @@ export class OrderDAO {
       return null;
     }
 
-    await pedido.update({ estado });
+    await pedido.update({ estado: estado as any });
     return this.findById(id);
   }
 
@@ -257,7 +284,7 @@ export class OrderDAO {
         nombre: pedido.vendedor.nombre,
         email: pedido.vendedor.email
       },
-      productos: pedido.pedidoProductos.map((pp: any) => ({
+      productos: (pedido.pedidoProductos || []).map((pp: any) => ({
         id: pp.id,
         cantidad: pp.cantidad,
         precioUnitario: parseFloat(pp.precioUnitario.toString()),

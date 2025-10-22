@@ -5,27 +5,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: sportsline-api-prod
+    env_file: .env
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URI: ${DATABASE_URI}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      RSA_PUBLIC_KEY: ${RSA_PUBLIC_KEY}
-      RSA_PRIVATE_KEY: ${RSA_PRIVATE_KEY}
+    restart: always
     deploy:
       resources:
         limits:
           cpus: '1.0'
-          memory: '1G'
+          memory: 1G
         reservations:
           cpus: '0.5'
-          memory: '512M'
-    restart: always
+          memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+

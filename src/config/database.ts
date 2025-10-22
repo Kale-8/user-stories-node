@@ -3,16 +3,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is not set');
-}
+const DATABASE_URI = process.env.DATABASE_URI || '';
 
-export const sequelize = new Sequelize(databaseUrl, {
+export const sequelize = new Sequelize(DATABASE_URI, {
   dialect: 'postgres',
   logging: false,
 });
 
-export async function testConnection(): Promise<void> {
-  await sequelize.authenticate();
+export async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection to PostgreSQL has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+    throw error;
+  }
 }

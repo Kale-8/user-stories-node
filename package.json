@@ -7,8 +7,22 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "ts-node src/seeds/seed.ts"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "seed": "ts-node src/seeds/seed.ts",
+    "docker:build": "docker build -t sportsline-api .",
+    "docker:run": "docker run -d --name sportsline-api -p 3000:3000 --env-file .env sportsline-api",
+    "docker:stop": "docker stop sportsline-api",
+    "docker:remove": "docker rm sportsline-api",
+    "docker:logs": "docker logs -f sportsline-api",
+    "docker:compose:up": "docker-compose up --build",
+    "docker:compose:up:d": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f",
+    "docker:compose:prod:up": "docker-compose -f docker-compose.prod.yml up -d",
+    "docker:compose:prod:down": "docker-compose -f docker-compose.prod.yml down",
+    "docker:compose:prod:logs": "docker-compose -f docker-compose.prod.yml logs -f"
   },
   "repository": {
     "type": "git",
@@ -23,10 +37,12 @@
   },
   "homepage": "https://github.com/Kale-8/user-stories-node#readme",
   "dependencies": {
+    "@types/js-yaml": "^4.0.9",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
+    "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
@@ -38,12 +54,17 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.9.1",
+    "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   }
 }

@@ -1,23 +1,20 @@
-version: 3.8
+version: '3.8'
+
 services:
   app:
     build: .
-    container_name: user-stories-node
+    container_name: sportsline-api
     env_file: .env
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     ports:
-      - 3000:3000
+      - "3000:3000"
     restart: unless-stopped
-    # Resource limits (compose v3 deploy for swarm, plus v2 compat labels)
     deploy:
       resources:
         limits:
-          cpus: 0.50
+          cpus: '0.5'
           memory: 512M
         reservations:
-          cpus: 0.25
+          cpus: '0.25'
           memory: 256M
-    # For docker compose v2 non-swarm, map limits as well
-    mem_limit: 512m
-    cpus: 0.50
