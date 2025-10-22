@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { UserDAO } from '../dao/user.dao';
 import { RegisterDTO, LoginDTO } from '../dto/auth.dto';
+import { JWTService } from './jwt.service';
 
 export class AuthService {
   static async register(input: RegisterDTO) {
@@ -15,7 +16,16 @@ export class AuthService {
       passwordHash,
       rol: input.rol,
     });
-    return { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol };
+    
+    const tokenPayload = { userId: user.id, email: user.email, rol: user.rol };
+    const accessToken = JWTService.generateAccessToken(tokenPayload);
+    const refreshToken = JWTService.generateRefreshToken(tokenPayload);
+    
+    return { 
+      user: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol },
+      accessToken,
+      refreshToken
+    };
   }
 
   static async login(input: LoginDTO) {
@@ -27,7 +37,26 @@ export class AuthService {
     if (!ok) {
       throw new Error('Credenciales inválidas');
     }
-    return { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol };
+    
+    const tokenPayload = { userId: user.id, email: user.email, rol: user.rol };
+    const accessToken = JWTService.generateAccessToken(tokenPayload);
+    const refreshToken = JWTService.generateRefreshToken(tokenPayload);
+    
+    return { 
+      user: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol },
+      accessToken,
+      refreshToken
+    };
+  }
+
+  static async refreshToken(refreshToken: string) {
+    try {
+      const payload = JWTService.verifyRefreshToken(refreshToken);
+      const newAccessToken = JWTService.generateAccessToken(payload);
+      return { accessToken: newAccessToken };
+    } catch (error) {
+      throw new Error('Token de refresh inválido');
+    }
   }
 }
 
