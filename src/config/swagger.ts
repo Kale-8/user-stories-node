@@ -56,6 +56,53 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' },
           },
         },
+        Order: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            clienteId: { type: 'integer', example: 1 },
+            vendedorId: { type: 'integer', example: 2 },
+            total: { type: 'number', format: 'float', example: 150.50 },
+            estado: { type: 'string', enum: ['pendiente', 'confirmado', 'enviado', 'entregado', 'cancelado'], example: 'pendiente' },
+            fechaPedido: { type: 'string', format: 'date-time' },
+            cliente: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Juan Pérez' },
+                email: { type: 'string', example: 'juan@email.com' }
+              }
+            },
+            vendedor: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 2 },
+                nombre: { type: 'string', example: 'María García' },
+                email: { type: 'string', example: 'maria@sportsline.local' }
+              }
+            },
+            productos: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'integer', example: 1 },
+                  cantidad: { type: 'integer', example: 2 },
+                  precioUnitario: { type: 'number', format: 'float', example: 25.5 },
+                  subtotal: { type: 'number', format: 'float', example: 51.0 },
+                  producto: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 1 },
+                      codigo: { type: 'string', example: 'P001' },
+                      nombre: { type: 'string', example: 'Balón de fútbol' }
+                    }
+                  }
+                }
+              }
+            }
+          },
+        },
         Error: {
           type: 'object',
           properties: {
