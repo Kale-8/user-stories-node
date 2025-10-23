@@ -290,31 +290,4 @@ npm run seed        # Run seeds
 4. Push to branch (`git push origin feature/new-feature`)
 5. Open Pull Request
 
-## 📝 License
-
-This project is under the MIT License. See `LICENSE` for more details.
-
-## 👥 Team
-
-- **Development**: SportsLine Development Team
-- **Email**: dev@sportsline.local
-
-## 🆘 Support
-
-For technical support or questions:
-
-- **Email**: support@sportsline.local
-- **Documentation**: http://localhost:3000/api-docs
-- **Issues**: GitHub Issues
-
 ---
-
-## 📊 Project status
-
-- ✅ **HU1**: Initial project setup
-- ✅ **HU2**: Authentication and user roles  
-- ✅ **HU3**: Product and client management
-- ✅ **HU4**: Order management and validations
-- ✅ **HU5**: Quality, security and deployment
-
-**Project 100% complete** 🎉
