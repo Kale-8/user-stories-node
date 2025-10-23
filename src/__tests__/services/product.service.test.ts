@@ -28,16 +28,19 @@ describe('ProductService', () => {
       const products = await ProductService.getAllProducts();
       
       expect(products).toHaveLength(2);
-      expect(products[0].codigo).toBe('TEST001');
-      expect(products[1].codigo).toBe('TEST002');
+      expect(products[0]?.codigo).toBe('TEST001');
+      expect(products[1]?.codigo).toBe('TEST002');
     });
   });
 
   describe('getProductById', () => {
     it('should return product by id', async () => {
       const products = await ProductService.getAllProducts();
-      const product = await ProductService.getProductById(products[0].id);
-      
+      const firstProduct = products[0];
+      expect(firstProduct).toBeDefined();
+
+      const product = await ProductService.getProductById(firstProduct!.id);
+
       expect(product).toBeDefined();
       expect(product?.codigo).toBe('TEST001');
       expect(product?.nombre).toBe('Test Product 1');
@@ -85,14 +88,17 @@ describe('ProductService', () => {
   describe('updateProduct', () => {
     it('should update product successfully', async () => {
       const products = await ProductService.getAllProducts();
+      const firstProduct = products[0];
+      expect(firstProduct).toBeDefined();
+
       const updateData = {
         nombre: 'Updated Product',
         precio: 35.00,
         stock: 20
       };
 
-      const updatedProduct = await ProductService.updateProduct(products[0].id, updateData);
-      
+      const updatedProduct = await ProductService.updateProduct(firstProduct!.id, updateData);
+
       expect(updatedProduct).toBeDefined();
       expect(updatedProduct?.nombre).toBe('Updated Product');
       expect(updatedProduct?.precio).toBe(35);
@@ -109,8 +115,11 @@ describe('ProductService', () => {
   describe('deleteProduct', () => {
     it('should delete product successfully', async () => {
       const products = await ProductService.getAllProducts();
-      const deleted = await ProductService.deleteProduct(products[0].id);
-      
+      const firstProduct = products[0];
+      expect(firstProduct).toBeDefined();
+
+      const deleted = await ProductService.deleteProduct(firstProduct!.id);
+
       expect(deleted).toBe(true);
       
       const remainingProducts = await ProductService.getAllProducts();

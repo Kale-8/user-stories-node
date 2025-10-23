@@ -2,7 +2,7 @@ import { JWTService } from '../../services/jwt.service';
 
 describe('JWTService', () => {
   const mockUser = {
-    id: 1,
+    userId: 1,
     email: 'test@example.com',
     rol: 'vendedor' as const
   };
@@ -33,7 +33,7 @@ describe('JWTService', () => {
       const decoded = JWTService.verifyAccessToken(token);
       
       expect(decoded).toBeDefined();
-      expect(decoded.userId).toBe(mockUser.id);
+      expect(decoded.userId).toBe(mockUser.userId);
       expect(decoded.email).toBe(mockUser.email);
       expect(decoded.rol).toBe(mockUser.rol);
     });
@@ -50,7 +50,7 @@ describe('JWTService', () => {
       const decoded = JWTService.verifyRefreshToken(token);
       
       expect(decoded).toBeDefined();
-      expect(decoded.userId).toBe(mockUser.id);
+      expect(decoded.userId).toBe(mockUser.userId);
       expect(decoded.email).toBe(mockUser.email);
       expect(decoded.rol).toBe(mockUser.rol);
     });
