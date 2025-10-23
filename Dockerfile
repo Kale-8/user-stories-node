@@ -1,4 +1,4 @@
--# Use a slim Node image
+# Use a slim Node image
 FROM node:20-slim AS base
 
 WORKDIR /app
